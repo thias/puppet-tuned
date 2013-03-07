@@ -9,38 +9,54 @@
 #  $source:
 #    Puppet source location for the profile's files, used only for non-default
 #    profiles. Default: none
+#  $ensure:
+#    Presence of tuned, 'absent' to disable and remove. Default: 'present'
 #
 class tuned (
   $profile = 'default',
-  $source = undef,
+  $source  = undef,
+  $ensure  = present
 ) {
 
-  # One package, two services
-  package { 'tuned': ensure => installed }
-  service { [ 'tuned', 'ktune' ]:
-    enable    => true,
-    ensure    => running,
-    hasstatus => true,
-    require   => Package['tuned'],
-  }
+  # One package
+  package { 'tuned': ensure => $ensure }
 
-  # Enable the chosen profile
-  exec { "/usr/sbin/tuned-adm profile ${profile}":
-    unless => "/bin/grep -q -e '^${profile}\$' /etc/tune-profiles/active-profile",
-    # No need to notify services, tuned-adm restarts them alone
-  }
+  # Only if we are 'present'
+  if $ensure != 'absent' {
 
-  # Install the profile's file tree if source is given
-  if $source {
-    file { "/etc/tune-profiles/${profile}":
-      owner   => 'root',
-      group   => 'root',
-      mode    => '0755',
-      ensure  => directory,
-      recurse => true,
-      purge   => true,
-      source  => $source,
+    # Two services
+    service { [ 'tuned', 'ktune' ]:
+      enable    => true,
+      ensure    => running,
+      hasstatus => true,
+      require   => Package['tuned'],
     }
+
+    # Enable the chosen profile
+    exec { "tuned-adm profile ${profile}":
+      unless  => "grep -q -e '^${profile}\$' /etc/tune-profiles/active-profile",
+      require => Package['tuned'],
+      before  => [ Service['tuned'], Service['ktune'] ],
+      path    => [ '/bin', '/usr/sbin' ],
+      # No need to notify services, tuned-adm restarts them alone
+    }
+
+    # Install the profile's file tree if source is given
+    if $source {
+      file { "/etc/tune-profiles/${profile}":
+        owner   => 'root',
+        group   => 'root',
+        mode    => '0755',
+        ensure  => directory,
+        recurse => true,
+        purge   => true,
+        source  => $source,
+        # For the parent directory
+        require => Package['tuned'],
+        before  => Exec["tuned-adm profile ${profile}"],
+      }
+    }
+
   }
 
 }

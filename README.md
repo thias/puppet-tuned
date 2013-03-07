@@ -20,3 +20,14 @@ Install and enable tuned with the ''virtual-host'' profile :
 Check the output of `tuned-adm list` to see the available profiles on your
 systems.
 
+Install and enable tuned with a custom profile, contained in another module :
+
+    class { 'tuned':
+      profile => 'my-super-tweaks',
+      source  => 'puppet:///modules/mymodule/tune-profiles/my-super-tweaks',
+    }
+
+To completely disable and remove a previously configured tuned :
+
+    class { 'tuned': ensure => absent }
+

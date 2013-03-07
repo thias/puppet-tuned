@@ -1,1 +1,1 @@
-include tuned
+class { 'tuned': profile => 'throughput-performance' }

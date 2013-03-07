@@ -1,7 +1,8 @@
 2013-03-07 - 0.2.0
+* Support external custom profiles.
+* Support ensure => absent for removal.
 * Change to 2 space indent.
 * Add examples and use markdown for the README.
-* Start implementing support for external custom profiles.
 
 2012-10-11 - 0.0.1
 * Initial module release.
