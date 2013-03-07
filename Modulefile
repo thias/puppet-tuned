@@ -1,8 +1,8 @@
 name 'thias-tuned'
-version '0.1.1'
-source 'git://github.com/thias/puppet-modules/modules/tuned'
+version '0.2.0'
+source 'git://github.com/thias/puppet-tuned'
 author 'Matthias Saou'
 license 'Apache 2.0'
-summary 'Tuned module'
+summary 'Tuned adaptive system tuning daemon module'
 description "Install, enable and configure the tuned adaptive system tuning daemon."
-project_page 'http://glee.thias.es/puppet'
+project_page 'https://github.com/thias/puppet-tuned'
