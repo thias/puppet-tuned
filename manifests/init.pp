@@ -15,49 +15,42 @@
 class tuned (
   $profile = 'default',
   $source  = undef,
-  $ensure  = present
+  $ensure  = present,
 ) {
 
-  # One package
-  package { 'tuned': ensure => $ensure }
-
-  # Only if we are 'present'
-  if $ensure != 'absent' {
-
-    # Two services
-    service { [ 'tuned', 'ktune' ]:
-      enable    => true,
-      ensure    => running,
-      hasstatus => true,
-      require   => Package['tuned'],
-    }
-
-    # Enable the chosen profile
-    exec { "tuned-adm profile ${profile}":
-      unless  => "grep -q -e '^${profile}\$' /etc/tune-profiles/active-profile",
-      require => Package['tuned'],
-      before  => [ Service['tuned'], Service['ktune'] ],
-      path    => [ '/bin', '/usr/sbin' ],
-      # No need to notify services, tuned-adm restarts them alone
-    }
-
-    # Install the profile's file tree if source is given
-    if $source {
-      file { "/etc/tune-profiles/${profile}":
-        owner   => 'root',
-        group   => 'root',
-        mode    => '0755',
-        ensure  => directory,
-        recurse => true,
-        purge   => true,
-        source  => $source,
-        # For the parent directory
-        require => Package['tuned'],
-        before  => Exec["tuned-adm profile ${profile}"],
+  # As far as I know, at this time only Red Hat variations supported tuned.
+  if $::osfamily == 'RedHat' {
+      # Find out which Red Hat variation
+      case $::operatingsystem {
+        # This isn't a complete list of Red Hat derivatives, but it is what I
+        # have availible to test on.
+        'RedHat', 'CentOS', 'Scientific', 'OracleLinux': {
+          # Only versions greater then Red Hat 6 are supported.
+          if ( $::operatingsystemmajrelease >= 6 ) or ( $::lsbmajdistrelease >= 6 ) {
+            # If everything checks out, pass profiles on to do the real work.
+            class { 'tuned::tuned': profile => $profile, source=>$source, ensure=>$ensure, }
+          } else {
+            # Wrong version
+            class { 'tuned::error' : errormsg => 'WrongVersion',}
+          }
+        }
+        # Fedora is a bit different. Tuned was packaged in 12. While not
+        # advisable to run old versions of Fedora, it happens.
+        'Fedora': {
+          if ( $::operatingsystemrelease >= 12 ) or ( $::lsbmajdistrelease >= 12 ) {
+            # If everything checks out, pass profiles on to do the real work.
+            class { 'tuned::tuned': profile => $profile, source=>$source, ensure=>$ensure,}
+          } else {
+            # Wrong version
+            class { 'tuned::error' : errormsg => 'WrongVersion',}
+          }
+        }
+        # Don't recognize this version of Red Hat.
+        default: { class { 'tuned::error' : errormsg => 'WrongVariation',} }
       }
-    }
-
+  } else {
+        # This isn't a Red Hat variation.
+	class { 'tuned::error' : errormsg => 'WrongOS', }
   }
 
 }
-
