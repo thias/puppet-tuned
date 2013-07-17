@@ -18,44 +18,68 @@ class tuned (
   $ensure  = present
 ) {
 
-  # One package
-  package { 'tuned': ensure => $ensure }
+  # Support old facter versions without 'osfamily'
+  if
+    ( ( $::operatingsystem =~ /^(RedHat|CentOS|Scientific|OracleLinux)$/ ) and
+      ( $::operatingsystemrelease >= 6 )
+    ) or
+    ( ( $::operatingsystem == 'Fedora' ) and
+      ( $::operatingsystemrelease >= 12 )
+    )
+  {
 
-  # Only if we are 'present'
-  if $ensure != 'absent' {
+    # One package
+    package { 'tuned': ensure => $ensure }
 
-    # Two services
-    service { [ 'tuned', 'ktune' ]:
-      enable    => true,
-      ensure    => running,
-      hasstatus => true,
-      require   => Package['tuned'],
-    }
+    # Only if we are 'present'
+    if $ensure != 'absent' {
 
-    # Enable the chosen profile
-    exec { "tuned-adm profile ${profile}":
-      unless  => "grep -q -e '^${profile}\$' /etc/tune-profiles/active-profile",
-      require => Package['tuned'],
-      before  => [ Service['tuned'], Service['ktune'] ],
-      path    => [ '/bin', '/usr/sbin' ],
-      # No need to notify services, tuned-adm restarts them alone
-    }
-
-    # Install the profile's file tree if source is given
-    if $source {
-      file { "/etc/tune-profiles/${profile}":
-        owner   => 'root',
-        group   => 'root',
-        mode    => '0755',
-        ensure  => directory,
-        recurse => true,
-        purge   => true,
-        source  => $source,
-        # For the parent directory
-        require => Package['tuned'],
-        before  => Exec["tuned-adm profile ${profile}"],
+      # Two services, except on Fedora
+      if $::operatingsystem != 'Fedora' {
+        $tuned_services = [ 'tuned', 'ktune' ]
+      } else {
+        $tuned_services = [ 'tuned' ]
       }
+      service { $tuned_services:
+        enable    => true,
+        ensure    => running,
+        hasstatus => true,
+        require   => Package['tuned'],
+      }
+
+      # Enable the chosen profile
+      exec { "tuned-adm profile ${profile}":
+        unless  => "grep -q -e '^${profile}\$' /etc/tune-profiles/active-profile",
+        require => Package['tuned'],
+        before  => [ Service['tuned'], Service['ktune'] ],
+        path    => [ '/bin', '/usr/sbin' ],
+        # No need to notify services, tuned-adm restarts them alone
+      }
+
+      # Install the profile's file tree if source is given
+      if $source {
+        file { "/etc/tune-profiles/${profile}":
+          owner   => 'root',
+          group   => 'root',
+          mode    => '0755',
+          ensure  => directory,
+          recurse => true,
+          purge   => true,
+          source  => $source,
+          # For the parent directory
+          require => Package['tuned'],
+          before  => Exec["tuned-adm profile ${profile}"],
+        }
+      }
+
     }
+
+  } else {
+
+    # Report to both the agent and the master that we don't do anything
+    $message = "${::operatingsystem} ${::operatingsystemrelease} not supported by the tuned module"
+    notice($message)
+    notify { $message: withpath => true }
 
   }
 
