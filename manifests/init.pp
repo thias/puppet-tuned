@@ -20,7 +20,7 @@ class tuned (
 
   # Support old facter versions without 'osfamily'
   if
-    ( ( $::operatingsystem =~ /^(RedHat|CentOS|Scientific|OracleLinux)$/ ) and
+    ( ( $::operatingsystem =~ /^(RedHat|CentOS|Scientific|OracleLinux|CloudLinux)$/ ) and
       ( $::operatingsystemrelease >= 6 )
     ) or
     ( ( $::operatingsystem == 'Fedora' ) and
