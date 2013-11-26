@@ -1,4 +1,5 @@
 * Make tuned fail gracefully on unsupported systems (idea from cstackpole).
+* Add support for CloudLinux (#3, Maurits Landewers).
 
 2013-03-07 - 0.2.0
 * Support external custom profiles.
