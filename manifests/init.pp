@@ -52,7 +52,7 @@ class tuned (
         unless  => "grep -q -e '^${profile}\$' /etc/tune-profiles/active-profile",
         require => Package['tuned'],
         before  => [ Service['tuned'], Service['ktune'] ],
-        path    => [ '/bin', '/usr/sbin' ],
+        path    => [ '/sbin', '/bin', '/usr/sbin' ],
         # No need to notify services, tuned-adm restarts them alone
       }
 
