@@ -1,5 +1,6 @@
 * Make tuned fail gracefully on unsupported systems (idea from cstackpole).
 * Add support for CloudLinux (#3, Maurits Landewers).
+* Fix missing /sbin from tuned-adm profile exec (#5, @mlehner616).
 
 2013-03-07 - 0.2.0
 * Support external custom profiles.
