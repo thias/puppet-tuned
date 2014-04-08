@@ -1,5 +1,5 @@
 name 'thias-tuned'
-version '0.2.0'
+version '0.2.1'
 source 'git://github.com/thias/puppet-tuned'
 author 'Matthias Saou'
 license 'Apache 2.0'
