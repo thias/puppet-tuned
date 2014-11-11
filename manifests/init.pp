@@ -16,7 +16,7 @@ class tuned (
   $profile = 'default',
   $source  = undef,
   $ensure  = present
-) {
+) inherits tuned::params {
 
   # Support old facter versions without 'osfamily'
   if
@@ -34,31 +34,25 @@ class tuned (
     # Only if we are 'present'
     if $ensure != 'absent' {
 
-      # Two services, except on Fedora
-      if $::operatingsystem != 'Fedora' {
-        $tuned_services = [ 'tuned', 'ktune' ]
-      } else {
-        $tuned_services = [ 'tuned' ]
-      }
+      # Enable the service
       service { $tuned_services:
         enable    => true,
         ensure    => running,
         hasstatus => true,
-        require   => Package['tuned'],
+        require   => [ Package['tuned'], Exec["tuned-adm profile ${profile}"] ],
       }
 
       # Enable the chosen profile
       exec { "tuned-adm profile ${profile}":
-        unless  => "grep -q -e '^${profile}\$' /etc/tune-profiles/active-profile",
+        unless  => "grep -q -e '^${profile}\$' ${profile_path}/${active_profile}",
         require => Package['tuned'],
-        before  => [ Service['tuned'], Service['ktune'] ],
         path    => [ '/sbin', '/bin', '/usr/sbin' ],
         # No need to notify services, tuned-adm restarts them alone
       }
 
       # Install the profile's file tree if source is given
       if $source {
-        file { "/etc/tune-profiles/${profile}":
+        file { "${profile_path}/${profile}":
           owner   => 'root',
           group   => 'root',
           mode    => '0755',
