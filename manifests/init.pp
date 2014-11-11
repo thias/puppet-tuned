@@ -4,29 +4,26 @@
 # Linux 6.
 #
 # Parameters:
+#  $ensure:
+#    Presence of tuned, 'absent' to disable and remove. Default: 'present'
 #  $profile:
 #    Profile to use, see 'tuned-adm list'. Default: 'default'
 #  $source:
 #    Puppet source location for the profile's files, used only for non-default
 #    profiles. Default: none
-#  $ensure:
-#    Presence of tuned, 'absent' to disable and remove. Default: 'present'
 #
 class tuned (
-  $profile = 'default',
-  $source  = undef,
-  $ensure  = present
-) inherits tuned::params {
+  $ensure         = present,
+  $profile        = 'default',
+  $source         = undef,
+  $tuned_services = $::tuned::params::tuned_services,
+  $profile_path   = $::tuned::params::profile_path,
+  $active_profile = $::tuned::params::active_profile,
+) inherits ::tuned::params {
 
   # Support old facter versions without 'osfamily'
-  if
-    ( ( $::operatingsystem =~ /^(RedHat|CentOS|Scientific|OracleLinux|CloudLinux)$/ ) and
-      ( versioncmp($::operatingsystemrelease, '6') >= 0 )
-    ) or
-    ( ( $::operatingsystem == 'Fedora' ) and
-      ( versioncmp($::operatingsystemrelease, '12') >= 0 )
-    )
-  {
+  if ( $::operatingsystem == 'Fedora' ) or 
+     ( $::operatingsystem =~ /^(RedHat|CentOS|Scientific|OracleLinux|CloudLinux)$/ and versioncmp($::operatingsystemrelease, '6') >= 0 ) {
 
     # One package
     package { 'tuned': ensure => $ensure }
@@ -39,7 +36,7 @@ class tuned (
         enable    => true,
         ensure    => running,
         hasstatus => true,
-        require   => [ Package['tuned'], Exec["tuned-adm profile ${profile}"] ],
+        require   => Exec["tuned-adm profile ${profile}"],
       }
 
       # Enable the chosen profile
@@ -53,10 +50,10 @@ class tuned (
       # Install the profile's file tree if source is given
       if $source {
         file { "${profile_path}/${profile}":
+          ensure  => directory,
           owner   => 'root',
           group   => 'root',
           mode    => '0755',
-          ensure  => directory,
           recurse => true,
           purge   => true,
           source  => $source,

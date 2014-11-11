@@ -1,3 +1,6 @@
+2014-11-11 - 1.0.0
+* Add support for newer RHEL/CentOS 7 (#7, @stzilli).
+
 2014-04-08 - 0.2.1
 * Make tuned fail gracefully on unsupported systems (idea from cstackpole).
 * Add support for CloudLinux (#3, Maurits Landewers).
