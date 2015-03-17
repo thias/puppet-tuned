@@ -13,8 +13,8 @@
 #    profiles. Default: none
 #
 class tuned (
-  $ensure         = present,
-  $profile        = 'default',
+  $ensure         = 'present',
+  $profile        = $::tuned::params::default_profile,
   $source         = undef,
   $tuned_services = $::tuned::params::tuned_services,
   $profile_path   = $::tuned::params::profile_path,
@@ -53,7 +53,8 @@ class tuned (
           ensure  => directory,
           owner   => 'root',
           group   => 'root',
-          mode    => '0755',
+          # This magically becomes 755 for directories
+          mode    => '0644',
           recurse => true,
           purge   => true,
           source  => $source,

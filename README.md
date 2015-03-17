@@ -33,9 +33,9 @@ class { '::tuned':
 }
 ```
 
-To completely disable and remove a previously configured tuned :
+To completely stop, disable and remove tuned :
 
 ```puppet
-class { '::tuned': ensure => absent }
+class { '::tuned': ensure => 'absent' }
 ```
 
