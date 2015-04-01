@@ -1,3 +1,4 @@
+#### 2015-04-01 - 1.0.1
 * Set default profile to 'balanced' on RHEL7 and Fedora.
 
 #### 2014-11-11 - 1.0.0
