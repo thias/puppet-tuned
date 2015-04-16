@@ -61,6 +61,7 @@ class tuned (
           # For the parent directory
           require => Package['tuned'],
           before  => Exec["tuned-adm profile ${profile}"],
+          notify  => Service[$tuned_services],
         }
       }
 

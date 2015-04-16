@@ -1,3 +1,5 @@
+* Notify service(s) when the profile files change.
+
 #### 2015-04-01 - 1.0.1
 * Set default profile to 'balanced' on RHEL7 and Fedora.
 
