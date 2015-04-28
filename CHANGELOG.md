@@ -1,3 +1,4 @@
+#### 2015-04-28 - 1.0.2
 * Notify service(s) when the profile files change.
 
 #### 2015-04-01 - 1.0.1
