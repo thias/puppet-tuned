@@ -13,9 +13,12 @@
 #    profiles. Default: none
 #
 class tuned (
-  $ensure         = 'present',
-  $profile        = $::tuned::params::default_profile,
+  $service_ensure = 'running',
+  $service_enable = true,
+  $package_ensure = 'present',
+  $profile        = undef,
   $source         = undef,
+  $tuned_packages = $::tuned::params::tuned_packages,
   $tuned_services = $::tuned::params::tuned_services,
   $profile_path   = $::tuned::params::profile_path,
   $active_profile = $::tuned::params::active_profile,
@@ -25,46 +28,47 @@ class tuned (
   if ( $::operatingsystem == 'Fedora' ) or
     ( $::operatingsystem =~ /^(RedHat|CentOS|Scientific|OracleLinux|CloudLinux)$/ and versioncmp($::operatingsystemrelease, '6') >= 0 ) {
 
-    # One package
-    package { 'tuned': ensure => $ensure }
+    # One package only if not stopped
+    package { $tuned_packages : ensure => $package_ensure }
 
-    # Only if we are 'present'
-    if $ensure != 'absent' {
+    service { $tuned_services:
+      ensure    => $service_ensure,
+      enable    => $service_enable,
+      hasstatus => true,
+      require   => Package[$tuned_packages],
+    }
 
-      # Enable the service
-      service { $tuned_services:
-        ensure    => 'running',
-        enable    => true,
-        hasstatus => true,
-        require   => Exec["tuned-adm profile ${profile}"],
+    # Install the profile's file tree if source is given
+    if $source {
+      file { "${profile_path}/${profile}":
+        ensure  => 'directory',
+        owner   => 'root',
+        group   => 'root',
+        # This magically becomes 755 for directories
+        mode    => '0644',
+        recurse => true,
+        purge   => true,
+        source  => $source,
+        # For the parent directory
+        require => Package[$tuned_packages],
+        before  => Anchor['profile_downloaded'],
+        notify  => Service[$tuned_services],
       }
+    }
 
-      # Enable the chosen profile
-      exec { "tuned-adm profile ${profile}":
-        unless  => "grep -q -e '^${profile}\$' ${profile_path}/${active_profile}",
-        require => Package['tuned'],
-        path    => [ '/sbin', '/bin', '/usr/sbin' ],
-        # No need to notify services, tuned-adm restarts them alone
+    anchor { 'profile_downloaded': }
+
+    if $profile {
+      file { 'current_profile' :
+        ensure  => file,
+        path    => "${profile_path}/${active_profile}",
+        owner   => 'root',
+        group   => 'root',
+        mode    => '0644',
+        content => "${profile}\n",
+        # notify is not needed. daemon monitors file by its own
+        require => Anchor['profile_downloaded'],
       }
-
-      # Install the profile's file tree if source is given
-      if $source {
-        file { "${profile_path}/${profile}":
-          ensure  => 'directory',
-          owner   => 'root',
-          group   => 'root',
-          # This magically becomes 755 for directories
-          mode    => '0644',
-          recurse => true,
-          purge   => true,
-          source  => $source,
-          # For the parent directory
-          require => Package['tuned'],
-          before  => Exec["tuned-adm profile ${profile}"],
-          notify  => Service[$tuned_services],
-        }
-      }
-
     }
 
   } else {
