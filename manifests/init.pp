@@ -68,6 +68,7 @@ class tuned (
         content => "${profile}\n",
         # notify is not needed. daemon monitors file by its own
         require => Anchor['profile_downloaded'],
+        notify  => Service[$tuned_services],
       }
     }
 
