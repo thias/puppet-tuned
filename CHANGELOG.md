@@ -1,3 +1,4 @@
+#### 2016-02-11 - 1.0.3
 * Fix ordering, the service must be running to set profile with tuned-adm.
 
 #### 2015-04-28 - 1.0.2
