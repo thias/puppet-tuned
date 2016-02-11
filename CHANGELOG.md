@@ -1,3 +1,5 @@
+* Fix ordering, the service must be running to set profile with tuned-adm.
+
 #### 2015-04-28 - 1.0.2
 * Notify service(s) when the profile files change.
 
