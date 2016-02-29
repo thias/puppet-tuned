@@ -26,7 +26,7 @@ class tuned (
     ( $::operatingsystem =~ /^(RedHat|CentOS|Scientific|OracleLinux|CloudLinux)$/ and versioncmp($::operatingsystemrelease, '6') >= 0 ) {
 
     # One package
-    package { 'tuned': ensure => $ensure }
+    ensure_package('tuned', { ensure => $ensure })
 
     # Only if we are 'present'
     if $ensure != 'absent' {
