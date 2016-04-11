@@ -20,9 +20,7 @@ class tuned (
   $tuned_services = $::tuned::params::tuned_services,
   $profile_path   = $::tuned::params::profile_path,
   $active_profile = $::tuned::params::active_profile,
-) {
-
-  include tuned::params
+) inherits tuned::params {
 
   # Support old facter versions without 'osfamily'
   if ( $::operatingsystem == 'Fedora' ) or
@@ -68,16 +66,18 @@ class tuned (
         }
       } elsif $content {
         file { "${profile_path}/${profile}":
-          ensure  => 'directory',
+          ensure => 'directory',
+          owner  => 'root',
+          group  => 'root',
+          mode   => '0755',
+        }
+        file { "${profile_path}/${profile}/tuned.conf":
+          ensure  => 'present',
           owner   => 'root',
           group   => 'root',
-          # This magically becomes 755 for directories
           mode    => '0644',
-          recurse => true,
-          purge   => true,
           content => $content,
-          # For the parent directory
-          require => Package['tuned'],
+          require => [File["${profile_path}/${profile}"], Package['tuned']],
           before  => Exec["tuned-adm profile ${profile}"],
           notify  => Service[$tuned_services],
         }
@@ -91,4 +91,3 @@ class tuned (
   }
 
 }
-
