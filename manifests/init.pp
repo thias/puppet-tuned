@@ -11,6 +11,8 @@
 #  $source:
 #    Puppet source location for the profile's files, used only for non-default
 #    profiles. Default: none
+#  $settings:
+#    Hash settings to create tuned.conf profile's file. Default: undef
 #
 class tuned (
   $ensure         = 'present',
@@ -19,6 +21,7 @@ class tuned (
   $tuned_services = $::tuned::params::tuned_services,
   $profile_path   = $::tuned::params::profile_path,
   $active_profile = $::tuned::params::active_profile,
+  $settings       = undef,
 ) inherits ::tuned::params {
 
   # Support old facter versions without 'osfamily'
@@ -47,8 +50,12 @@ class tuned (
         # No need to notify services, tuned-adm restarts them alone
       }
 
-      # Install the profile's file tree if source is given
+      if $settings and $source {
+        fail('source & settings parameters are exclusive.')
+      }
+
       if $source {
+        # Install the profile's file tree if source is given
         file { "${profile_path}/${profile}":
           ensure  => 'directory',
           owner   => 'root',
@@ -62,6 +69,25 @@ class tuned (
           require => Package['tuned'],
           before  => Exec["tuned-adm profile ${profile}"],
           notify  => Service[$tuned_services],
+        }
+      }elsif $settings {
+        # Generate & install the profile according to the settings parameter
+        validate_hash($settings)
+        file {
+          "${profile_path}/${profile}":
+            ensure  => 'directory',
+            owner   => 'root',
+            group   => 'root',
+            mode    => '0755',
+            require => Package['tuned'];
+          "${profile_path}/${profile}/tuned.conf":
+            ensure  => 'present',
+            owner   => 'root',
+            group   => 'root',
+            mode    => '0644',
+            content => template('tuned/tuned.conf.erb'),
+            before  => Exec["tuned-adm profile ${profile}"],
+            notify  => Service[$tuned_services];
         }
       }
 
@@ -77,4 +103,3 @@ class tuned (
   }
 
 }
-
