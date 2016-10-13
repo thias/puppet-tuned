@@ -53,13 +53,18 @@ class tuned (
           ensure  => 'directory',
           owner   => 'root',
           group   => 'root',
-          # This magically becomes 755 for directories
-          mode    => '0644',
-          recurse => true,
+          mode    => '0755',
           purge   => true,
-          source  => $source,
           # For the parent directory
           require => Package['tuned'],
+        }
+        file { "${profile_path}/${profile}/tuned.conf":
+          owner   => 'root',
+          group   => 'root',
+          mode    => '0644',
+          recurse => true,
+          source  => $source,
+          require => File["${profile_path}/${profile}"],
           before  => Exec["tuned-adm profile ${profile}"],
           notify  => Service[$tuned_services],
         }
