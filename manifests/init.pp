@@ -31,6 +31,26 @@ class tuned (
     # Only if we are 'present'
     if $ensure != 'absent' {
 
+      # Ensure Tuned is started before some DBMS services
+      include '::rhel::systemd'
+      file { '/etc/systemd/system/tuned.service.d':
+        ensure  => 'directory',
+        owner   => 'root',
+        group   => 'root',
+        mode    => '0755',
+        seluser => 'system_u',
+        seltype => 'systemd_unit_file_t',
+      }
+      file { '/etc/systemd/system/tuned.service.d/tuned.conf':
+        owner   => 'root',
+        group   => 'root',
+        mode    => '0644',
+        seluser => 'system_u',
+        seltype => 'systemd_unit_file_t',
+        content => "[Unit]\nBefore=mariadb.service mongod.service redis-server\n",
+        notify  => Exec['systemctl daemon-reload'],
+      }
+
       # Enable the service
       service { $tuned_services:
         ensure    => 'running',
