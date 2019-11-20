@@ -33,9 +33,17 @@ class { '::tuned':
 }
 ```
 
+Or add a custom profile by passing its content directly :
+
+```puppet
+class { '::tuned':
+  profile => 'my-super-tweaks',
+  content => "[main]\ninclude=virtual-guest\n\n[vm]\ntransparent_hugepages=never",
+}
+```
+
 To completely stop, disable and remove tuned :
 
 ```puppet
 class { '::tuned': ensure => 'absent' }
 ```
-

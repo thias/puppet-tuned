@@ -16,10 +16,11 @@ class tuned (
   $ensure         = 'present',
   $profile        = $::tuned::params::default_profile,
   $source         = undef,
+  $content        = undef,
   $tuned_services = $::tuned::params::tuned_services,
   $profile_path   = $::tuned::params::profile_path,
   $active_profile = $::tuned::params::active_profile,
-) inherits ::tuned::params {
+) inherits tuned::params {
 
   # Support old facter versions without 'osfamily'
   if ( $::operatingsystem == 'Fedora' ) or
@@ -85,18 +86,30 @@ class tuned (
           before  => Exec["tuned-adm profile ${profile}"],
           notify  => Service[$tuned_services],
         }
+      } elsif $content {
+        file { "${profile_path}/${profile}":
+          ensure => 'directory',
+          owner  => 'root',
+          group  => 'root',
+          mode   => '0755',
+        }
+        file { "${profile_path}/${profile}/tuned.conf":
+          ensure  => 'present',
+          owner   => 'root',
+          group   => 'root',
+          mode    => '0644',
+          content => $content,
+          require => [File["${profile_path}/${profile}"], Package['tuned']],
+          before  => Exec["tuned-adm profile ${profile}"],
+          notify  => Service[$tuned_services],
+        }
       }
-
     }
-
   } else {
-
     # Report to both the agent and the master that we don't do anything
     $message = "${::operatingsystem} ${::operatingsystemrelease} not supported by the tuned module"
     notice($message)
     notify { $message: withpath => true }
-
   }
 
 }
-
