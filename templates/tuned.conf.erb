@@ -1,0 +1,12 @@
+#
+# File managed by Puppet in module tuned
+#
+<% if @settings -%>
+<% @settings.each_pair do |plugin,data| -%>
+
+[<%= plugin %>]
+<% data.each_pair do |key,value| -%>
+<%= key %>=<%= value %>
+<% end -%>
+<% end -%>
+<% end -%>

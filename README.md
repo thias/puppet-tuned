@@ -33,6 +33,19 @@ class { '::tuned':
 }
 ```
 
+Install and enable tuned with a custom profile :
+
+```puppet
+class { '::tuned':
+  profile => 'my-super-tweaks',
+  settings => {
+    'main'   => { 'include' => 'virtual-guest' },
+    'sysctl' => { 'vm.dirty_ratio' => '30',
+                  'vm.swappiness'  => '30', },
+              },
+}
+```
+
 To completely stop, disable and remove tuned :
 
 ```puppet
