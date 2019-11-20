@@ -1,3 +1,6 @@
+#### 2019-11-20 - 1.0.4
+* Ensure systemd starts tuned before some DBMS services (#20, @osgpcq).
+
 #### 2016-02-11 - 1.0.3
 * Fix ordering, the service must be running to set profile with tuned-adm.
 
