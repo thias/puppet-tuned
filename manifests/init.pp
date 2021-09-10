@@ -21,9 +21,7 @@ class tuned (
   $active_profile = $::tuned::params::active_profile,
 ) inherits ::tuned::params {
 
-  # Support old facter versions without 'osfamily'
-  if ( $::operatingsystem == 'Fedora' ) or
-    ( $::operatingsystem =~ /^(RedHat|CentOS|Scientific|OracleLinux|CloudLinux)$/ and versioncmp($::operatingsystemrelease, '6') >= 0 ) {
+  if ( ( $facts['os']['family'] == 'RedHat' ) and versioncmp($::operatingsystemrelease, '6') >= 0 ) {
 
     # One package
     package { 'tuned': ensure => $ensure }
