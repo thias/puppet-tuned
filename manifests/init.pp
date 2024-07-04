@@ -11,6 +11,9 @@
 #  $source:
 #    Puppet source location for the profile's files, used only for non-default
 #    profiles. Default: none
+#  $scripts:
+#    Set to true if the source profile contains scripts, in order for all files
+#    to become executable (including tuned.conf, unfortunately).
 #  $settings:
 #    Hash settings to create tuned.conf profile's file. Default: undef
 #
@@ -18,10 +21,11 @@ class tuned (
   $ensure         = 'present',
   $profile        = $::tuned::params::default_profile,
   $source         = undef,
+  $scripts        = false,
+  $settings       = undef,
   $tuned_services = $::tuned::params::tuned_services,
   $profile_path   = $::tuned::params::profile_path,
   $active_profile = $::tuned::params::active_profile,
-  $settings       = undef,
 ) inherits ::tuned::params {
 
   if ( ( $facts['os']['family'] == 'RedHat' ) and versioncmp($::operatingsystemrelease, '6') >= 0 ) {
@@ -80,8 +84,11 @@ class tuned (
           ensure  => 'directory',
           owner   => 'root',
           group   => 'root',
-          # This magically becomes 755 for directories
-          mode    => '0644',
+          mode    => $scripts ? {
+            true  => '0755',
+            # This magically becomes 755 for directories
+            false => '0644',
+          },
           recurse => true,
           purge   => true,
           source  => $source,
@@ -90,24 +97,23 @@ class tuned (
           before  => Exec["tuned-adm profile ${profile}"],
           notify  => Service[$tuned_services],
         }
-      }elsif $settings {
+      } elsif $settings {
         # Generate & install the profile according to the settings parameter
         validate_hash($settings)
-        file {
-          "${profile_path}/${profile}":
-            ensure  => 'directory',
-            owner   => 'root',
-            group   => 'root',
-            mode    => '0755',
-            require => Package['tuned'];
-          "${profile_path}/${profile}/tuned.conf":
-            ensure  => 'present',
-            owner   => 'root',
-            group   => 'root',
-            mode    => '0644',
-            content => template('tuned/tuned.conf.erb'),
-            before  => Exec["tuned-adm profile ${profile}"],
-            notify  => Service[$tuned_services];
+        file { "${profile_path}/${profile}":
+          ensure  => 'directory',
+          owner   => 'root',
+          group   => 'root',
+          mode    => '0755',
+          require => Package['tuned'];
+        }
+        file { "${profile_path}/${profile}/tuned.conf":
+          owner   => 'root',
+          group   => 'root',
+          mode    => '0644',
+          content => template('tuned/tuned.conf.erb'),
+          before  => Exec["tuned-adm profile ${profile}"],
+          notify  => Service[$tuned_services];
         }
       }
 

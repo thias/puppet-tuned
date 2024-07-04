@@ -29,20 +29,28 @@ Install and enable tuned with a custom profile, contained in another module :
 ```puppet
 class { '::tuned':
   profile => 'my-super-tweaks',
-  source  => 'puppet:///modules/mymodule/tune-profiles/my-super-tweaks',
+  source  => 'puppet:///modules/mymodule/tuned-profiles/my-super-tweaks',
 }
 ```
+
+The above expects
+`modules/mymodule/files/tuned-profiles/my-super-tweaks/tuned.conf` and may
+include additional scripts next to `tuned.conf`.
 
 Install and enable tuned with a custom profile :
 
 ```puppet
 class { '::tuned':
-  profile => 'my-super-tweaks',
+  profile  => 'my-super-tweaks',
   settings => {
-    'main'   => { 'include' => 'virtual-guest' },
-    'sysctl' => { 'vm.dirty_ratio' => '30',
-                  'vm.swappiness'  => '30', },
-              },
+    'main'   => {
+      'include' => 'virtual-guest',
+    },
+    'sysctl' => {
+      'vm.dirty_ratio' => '30',
+      'vm.swappiness'  => '30',
+    },
+  },
 }
 ```
 

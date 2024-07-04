@@ -1,3 +1,7 @@
+* Use os::family==RedHat to detect supported OS (#21, @olifre).
+* Add settings parameter for hash based custom tuned profile (#15, @GiooDev).
+* Add new $scripts parameter and update README about source being a dir.
+
 #### 2019-11-20 - 1.0.4
 * Ensure systemd starts tuned before some DBMS services (#20, @osgpcq).
 
