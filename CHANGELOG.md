@@ -1,3 +1,5 @@
+* Remove legacy facts usage.
+
 #### 2024-07-04 - 1.0.5
 * Use os::family==RedHat to detect supported OS (#21, @olifre).
 * Add settings parameter for hash based custom tuned profile (#15, @GiooDev).

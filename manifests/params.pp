@@ -1,7 +1,7 @@
 class tuned::params {
 
   # Two services, except on Fedora and RHEL/CentOS 7
-  if ( ( $facts['os']['family'] == 'RedHat' ) and versioncmp($::operatingsystemrelease, '7') >= 0 ) {
+  if ( ( $facts['os']['family'] == 'RedHat' ) and versioncmp($facts['os']['release']['major'], '7') >= 0 ) {
 
     $default_profile = 'balanced'
     $tuned_services  = [ 'tuned' ]

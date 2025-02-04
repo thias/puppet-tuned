@@ -28,7 +28,7 @@ class tuned (
   $active_profile = $::tuned::params::active_profile,
 ) inherits ::tuned::params {
 
-  if ( ( $facts['os']['family'] == 'RedHat' ) and versioncmp($::operatingsystemrelease, '6') >= 0 ) {
+  if ( ( $facts['os']['family'] == 'RedHat' ) and versioncmp($facts['os']['release']['major'], '6') >= 0 ) {
 
     # One package
     package { 'tuned': ensure => $ensure }
@@ -38,7 +38,7 @@ class tuned (
 
       # Ensure tuned is started before some DBMS, for when it's used to disable
       # transparent hugepages
-      if $::service_provider == 'systemd' {
+      if $facts['service_provider'] == 'systemd' {
         file { '/etc/systemd/system/tuned.service.d':
           ensure => 'directory',
           owner  => 'root',
@@ -53,7 +53,7 @@ class tuned (
         }
         ~> exec { 'tuned systemctl daemon-reload':
           command     => 'systemctl daemon-reload',
-          path        => $::path,
+          path        => $facts['path'],
           refreshonly => true,
           before      => Service['tuned'],
         }
@@ -122,7 +122,7 @@ class tuned (
   } else {
 
     # Report to both the agent and the master that we don't do anything
-    $message = "${::operatingsystem} ${::operatingsystemrelease} not supported by the tuned module"
+    $message = "${facts['os']['name']} ${facts['os']['release']['full']} not supported by the tuned module"
     notice($message)
     notify { $message: withpath => true }
 
