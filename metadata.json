@@ -1,6 +1,6 @@
 {
   "name": "thias-tuned",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "author": "Matthias Saou",
   "license": "Apache-2.0",
   "summary": "Tuned adaptive system tuning daemon module",
@@ -11,11 +11,11 @@
   "operatingsystem_support": [
     {
     "operatingsystem": "RedHat",
-    "operatingsystemrelease": [ "6", "7", "8", "9" ]
+    "operatingsystemrelease": [ "6", "7", "8", "9", "10" ]
     },
     {
     "operatingsystem": "CentOS",
-    "operatingsystemrelease": [ "6", "7", "8", "9" ]
+    "operatingsystemrelease": [ "6", "7", "8", "9", "10" ]
     }
   ],
   "requirements": [

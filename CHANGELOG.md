@@ -1,3 +1,6 @@
+#### 2025-06-01 - 1.0.7
+* Add compatibility for EL10.
+
 #### 2025-02-04 - 1.0.6
 * Remove legacy facts usage.
 
