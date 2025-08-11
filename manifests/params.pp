@@ -6,17 +6,18 @@ class tuned::params {
     $default_profile = 'balanced'
     $tuned_services  = [ 'tuned' ]
     $active_profile  = 'active_profile'
-
+    $config_path     = '/etc/tuned'
     $profile_path = versioncmp($facts['os']['release']['major'], '10') >= 0  ? {
-      true  => '/etc/tuned/profiles',
-      false => '/etc/tuned'
+      true  => "${config_path}/profiles",
+      false => $config_path
     }
 
   } else {
 
     $default_profile = 'default'
     $tuned_services  = [ 'tuned', 'ktune' ]
-    $profile_path    = '/etc/tune-profiles'
+    $config_path     = '/etc/tune-profiles'
+    $profile_path    = $config_path
     $active_profile  = 'active-profile'
 
   }

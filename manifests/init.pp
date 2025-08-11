@@ -68,7 +68,7 @@ class tuned (
 
       # Enable the chosen profile
       exec { "tuned-adm profile ${profile}":
-        unless  => "grep -q -e '^${profile}\$' ${profile_path}/${active_profile}",
+        unless  => "grep -q -e '^${profile}\$' ${config_path}/${active_profile}",
         require => Service['tuned'],
         path    => [ '/sbin', '/bin', '/usr/sbin' ],
         # No need to notify services, tuned-adm restarts them alone
