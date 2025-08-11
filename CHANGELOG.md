@@ -1,3 +1,6 @@
+#### 2025-08-11 - 1.0.8
+* Fix compatibility for EL10.
+
 #### 2025-06-01 - 1.0.7
 * Add compatibility for EL10.
 
